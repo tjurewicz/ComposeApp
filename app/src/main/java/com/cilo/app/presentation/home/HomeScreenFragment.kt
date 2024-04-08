@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cilo.app.R
 import com.cilo.app.data.models.Budget
@@ -43,14 +41,9 @@ import com.cilo.app.presentation.components.CiloBalanceIndicator
 import com.cilo.app.presentation.components.CiloBalanceIndicatorNoBudget
 import com.cilo.app.presentation.components.CiloNavigationBar
 import com.cilo.app.presentation.components.NavigationBarAddPurchaseButton
-import com.cilo.app.presentation.components.buttons.PrimaryButton
 import com.cilo.app.presentation.components.cards.HomeScreenPurchaseSummary
 import com.cilo.app.presentation.components.theme.CiloappTheme
-import com.cilo.app.presentation.components.theme.Grey80
 import com.cilo.app.presentation.components.theme.backgroundGradient
-import com.cilo.app.presentation.components.theme.selectableButtonColor
-import com.cilo.app.presentation.components.theme.unselectableButtonAndDividerColor
-import com.cilo.app.presentation.components.theme.unselectableButtonTextColor
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -109,35 +102,34 @@ fun HomeScreen(navController: NavController, viewModel: HomeScreenViewModel) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(top = 64.dp, bottom = 32.dp), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.Center
+                .padding(top = 64.dp, bottom = 32.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = { viewModel.budgetClicked(event.summary, event.budgets, event.currentBudget, event.onboarding) }, modifier = Modifier.offset(y = (-15).dp) ) {
-                Icon(painter = painterResource(R.drawable.ic_target), contentDescription = "", modifier = Modifier.size(32.dp))
+            IconButton(onClick = {
+                viewModel.budgetClicked(
+                    event.summary,
+                    event.budgets,
+                    event.currentBudget,
+                    event.onboarding
+                )
+            }, modifier = Modifier.offset(y = (-15).dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_target),
+                    contentDescription = "",
+                    modifier = Modifier.size(32.dp)
+                )
             }
             BudgetIndicator(summary, currentBudget)
-            IconButton(onClick = { /* Do nothing */ }, modifier = Modifier.offset(y = (-15).dp) ) {
-                Icon(painter = painterResource(R.drawable.ic_menu_more), contentDescription = "", modifier = Modifier.size(32.dp))
+            IconButton(onClick = { /* Do nothing */ }, modifier = Modifier.offset(y = (-15).dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_menu_more),
+                    contentDescription = "",
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
         Column(Modifier.fillMaxWidth()) {
-            if (onboardingIncomplete(event.onboarding)) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 48.dp), horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val buttons = getOnboardingButtons(event, coroutineScope, viewModel, navController)
-                    val subtitleText = when (buttons.keys.first { it.third == false }.first) {
-                        stringResource(R.string.what_is_a_cilo) -> stringResource(R.string.and_finally)
-                        stringResource(R.string.check_out_leaderboards) -> stringResource(R.string.first_purchase_recorded)
-                        stringResource(R.string.add_your_first_purchase) -> stringResource(R.string.great_work_next)
-                        else -> stringResource(R.string.lets_get_started)
-                    }
-                    Text(text = subtitleText, color = Grey80)
-                    Spacer(Modifier.height(16.dp))
-
-                }
-            }
             LazyColumn(
                 Modifier
                     .fillMaxSize()
@@ -154,7 +146,12 @@ fun HomeScreen(navController: NavController, viewModel: HomeScreenViewModel) {
                                 .padding(24.dp), horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(text = day.key, fontWeight = FontWeight.Bold)
-                            Text(text = String.format("₵%.2f", day.value.sumOf { it.ciloCost!!.toDouble() }), fontWeight = FontWeight.Bold)
+                            Text(
+                                text = String.format(
+                                    "₵%.2f",
+                                    day.value.sumOf { it.ciloCost!!.toDouble() }),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                     day.value.forEach {
@@ -174,103 +171,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeScreenViewModel) {
         }
     }
 }
-
-@Composable
-private fun getOnboardingButtons(
-    event: Event.Success,
-    coroutineScope: CoroutineScope,
-    viewModel: HomeScreenViewModel,
-    navController: NavController
-) = mutableMapOf(
-    Triple(
-        stringResource(R.string.set_your_carbon_budget),
-        painterResource(R.drawable.ic_target),
-        event.onboarding.budgetSet
-    ) to {
-        coroutineScope.launch {
-            viewModel.updateOnboarding(Onboarding().apply {
-                actionTakenInCharts = event.onboarding.actionTakenInCharts
-                addFirstPurchasePressed = event.onboarding.addFirstPurchasePressed
-                goToChartsPressed = event.onboarding.goToChartsPressed
-                goToTipsPressed = event.onboarding.goToTipsPressed
-                leaderboardsOpened = event.onboarding.leaderboardsOpened
-                missingItemPressed = event.onboarding.missingItemPressed
-                profileCreated = event.onboarding.profileCreated
-                purchaseAdded = event.onboarding.purchaseAdded
-                whatIsACiloPressed = event.onboarding.whatIsACiloPressed
-                setBudgetPressed = true
-                budgetSet = true
-            })
-        }
-        viewModel.budgetClicked(event.summary, event.budgets, event.currentBudget, event.onboarding)
-    },
-    Triple(
-        stringResource(R.string.add_your_first_purchase),
-        painterResource(R.drawable.ic_add_purchase),
-        event.onboarding.addFirstPurchasePressed
-    ) to {
-        coroutineScope.launch {
-            viewModel.updateOnboarding(Onboarding().apply {
-                actionTakenInCharts = event.onboarding.actionTakenInCharts
-                goToChartsPressed = event.onboarding.goToChartsPressed
-                goToTipsPressed = event.onboarding.goToTipsPressed
-                leaderboardsOpened = event.onboarding.leaderboardsOpened
-                missingItemPressed = event.onboarding.missingItemPressed
-                profileCreated = event.onboarding.profileCreated
-                whatIsACiloPressed = event.onboarding.whatIsACiloPressed
-                setBudgetPressed = event.onboarding.setBudgetPressed
-                budgetSet = event.onboarding.budgetSet
-                addFirstPurchasePressed = true
-                purchaseAdded = true
-            })
-        }
-        navController.navigate("addItem")
-    },
-    Triple(
-        stringResource(R.string.check_out_leaderboards),
-        painterResource(R.drawable.ic_leaderboard),
-        event.onboarding.leaderboardsOpened
-    ) to {
-        coroutineScope.launch {
-            viewModel.updateOnboarding(Onboarding().apply {
-                actionTakenInCharts = event.onboarding.actionTakenInCharts
-                goToChartsPressed = event.onboarding.goToChartsPressed
-                goToTipsPressed = event.onboarding.goToTipsPressed
-                missingItemPressed = event.onboarding.missingItemPressed
-                profileCreated = event.onboarding.profileCreated
-                whatIsACiloPressed = event.onboarding.whatIsACiloPressed
-                setBudgetPressed = event.onboarding.setBudgetPressed
-                budgetSet = event.onboarding.budgetSet
-                addFirstPurchasePressed = event.onboarding.addFirstPurchasePressed
-                purchaseAdded = event.onboarding.purchaseAdded
-                leaderboardsOpened = true
-            })
-        }
-        navController.navigate("leaderboard")
-    },
-    Triple(
-        stringResource(R.string.what_is_a_cilo),
-        painterResource(R.drawable.ic_cilo_symbol),
-        event.onboarding.whatIsACiloPressed
-    ) to {
-        coroutineScope.launch {
-            viewModel.updateOnboarding(Onboarding().apply {
-                actionTakenInCharts = event.onboarding.actionTakenInCharts
-                goToChartsPressed = event.onboarding.goToChartsPressed
-                goToTipsPressed = event.onboarding.goToTipsPressed
-                missingItemPressed = event.onboarding.missingItemPressed
-                profileCreated = event.onboarding.profileCreated
-                setBudgetPressed = event.onboarding.setBudgetPressed
-                budgetSet = event.onboarding.budgetSet
-                addFirstPurchasePressed = event.onboarding.addFirstPurchasePressed
-                purchaseAdded = event.onboarding.purchaseAdded
-                leaderboardsOpened = event.onboarding.leaderboardsOpened
-                whatIsACiloPressed = true
-            })
-        }
-        navController.navigate("whatIsACilo")
-    }
-)
 
 @Composable
 private fun BudgetIndicator(
@@ -300,13 +200,6 @@ private fun BudgetIndicator(
         CiloBalanceIndicatorNoBudget(cilosSpent = weekCost.roundToInt(), days = today.until(endOfWeek).days)
     }
 }
-
-fun onboardingIncomplete(onboarding: Onboarding): Boolean =
-    onboarding.budgetSet == false ||
-    onboarding.addFirstPurchasePressed == false ||
-    onboarding.leaderboardsOpened == false ||
-    onboarding.whatIsACiloPressed == false
-
 
 fun formatDate(currentItemDate: Long): String {
     val todaysDate = RealmInstant.now().epochSeconds * 1000L
