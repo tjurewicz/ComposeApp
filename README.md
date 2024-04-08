@@ -5,4 +5,4 @@ You should be able to build the app using `gradle build`.
 The app contains a few features:
 1. Login / Sign up
 2. Home screen
-3. Browsing a list of products
+3. Browsing a list of products (click the + icon on the nav bar from the home screen)
