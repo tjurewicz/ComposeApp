@@ -6,6 +6,6 @@ The app allows you to track the CO2 emissions of your diet. Simply add the groce
 
 Features:
 1. Login / Sign up
-2. Overview screen, showing your weekly CO2 budget and a list of shopping trips you've added
+2. Overview screen: showing your weekly CO2 budget and a list of shopping trips you've added
 3. Logging groceries: Searching a list of items, adding items to a basket, editing the basket, purchase summary screen
 4. Persistent storage using Realm
